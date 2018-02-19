@@ -340,7 +340,7 @@ namespace NBXplorer
 				{
 					await LoadChainFromNode(timeout.Token);
 				}
-				catch when(!cancellation.IsCancellationRequested)
+				catch(Exception e) when(!cancellation.IsCancellationRequested)
 				{
 					throw new OperationCanceledException("Loading the chain from the node timed out", timeout.Token);
 				}
