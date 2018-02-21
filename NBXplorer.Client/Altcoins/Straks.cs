@@ -38,8 +38,19 @@ namespace NBXplorer.Altcoins.Straks
         }
         static Lazy<object> _LazyRegistered = new Lazy<object>(RegisterLazy, false);
 
-        private static object RegisterLazy()
+
+	    private static uint FromByteArray(byte[] bytes)
+	    {
+
+		  //  if (BitConverter.IsLittleEndian)
+				//Array.Reverse(bytes);
+			return BitConverter.ToUInt32(bytes, 0);
+		}
+
+	    private static object RegisterLazy()
         {
+
+
             var port = 7575;
             NetworkBuilder builder = new NetworkBuilder();
             _Mainnet = builder.SetConsensus(new Consensus()
@@ -63,10 +74,11 @@ namespace NBXplorer.Altcoins.Straks
             .SetBase58Bytes(Base58Type.SECRET_KEY, new byte[] { 204 })
             .SetBase58Bytes(Base58Type.EXT_PUBLIC_KEY, new byte[] { 0x04, 0x88, 0xB2, 0x1E })
             .SetBase58Bytes(Base58Type.EXT_SECRET_KEY, new byte[] { 0x04, 0x88, 0xAD, 0xE4 })
-            //.SetBech32(Bech32Type.WITNESS_PUBKEY_ADDRESS, Encoders.Bech32("ltc"))
-            //.SetBech32(Bech32Type.WITNESS_SCRIPT_ADDRESS, Encoders.Bech32("ltc"))
-            .SetMagic(0xdbb6c0fb)
-            .SetPort(port)
+			//.SetBech32(Bech32Type.WITNESS_PUBKEY_ADDRESS, Encoders.Bech32("ltc"))
+			//.SetBech32(Bech32Type.WITNESS_SCRIPT_ADDRESS, Encoders.Bech32("ltc"))
+
+			.SetMagic(FromByteArray(new byte[] { 0xb0, 0xd5, 0xf0, 0x2c }))
+			.SetPort(port)
             .SetRPCPort(7576)
             .SetName("stak-main")
             .AddAlias("stak-mainnet")
@@ -117,8 +129,8 @@ namespace NBXplorer.Altcoins.Straks
             .SetBase58Bytes(Base58Type.EXT_SECRET_KEY, new byte[] { 0x46, 0x00, 0x2A, 0x10 })
             // .SetBech32(Bech32Type.WITNESS_PUBKEY_ADDRESS, Encoders.Bech32("tltc"))
             // .SetBech32(Bech32Type.WITNESS_SCRIPT_ADDRESS, Encoders.Bech32("tltc"))
-            .SetMagic(0xf1c8d2fd)
-            .SetPort(port)
+	            .SetMagic(FromByteArray(new byte[] { 0x2a, 0x1e, 0xd5, 0xd1 }))
+			.SetPort(port)
             .SetRPCPort(7576)
             .SetName("stak-test")
             .AddAlias("stak-testnet")
@@ -161,10 +173,11 @@ namespace NBXplorer.Altcoins.Straks
             .SetBase58Bytes(Base58Type.SECRET_KEY, new byte[] { 239 })
             .SetBase58Bytes(Base58Type.EXT_PUBLIC_KEY, new byte[] {0xA2,0xAE,0xC9,0xA6 })
             .SetBase58Bytes(Base58Type.EXT_SECRET_KEY, new byte[] { 0x46,0x00,0x2A,0x10})
-            // .SetBech32(Bech32Type.WITNESS_PUBKEY_ADDRESS, Encoders.Bech32("tltc"))
-            // .SetBech32(Bech32Type.WITNESS_SCRIPT_ADDRESS, Encoders.Bech32("tltc"))
-            .SetMagic(0xdab5bffa)
-            .SetPort(port)
+			// .SetBech32(Bech32Type.WITNESS_PUBKEY_ADDRESS, Encoders.Bech32("tltc"))
+			// .SetBech32(Bech32Type.WITNESS_SCRIPT_ADDRESS, Encoders.Bech32("tltc"))
+
+	            .SetMagic(FromByteArray(new byte[] { 0x6e, 0x5c, 0x2c, 0xef }))
+			.SetPort(port)
             .SetRPCPort(19332)
             .SetName("stak-reg")
             .AddAlias("stak-regtest")

@@ -15,7 +15,7 @@ namespace NBXplorer
 			{
 				
 				CryptoCode = "STAK",
-				MinRPCVersion = 140200,
+				MinRPCVersion = 1140701,
 				NBitcoinNetwork = chainType == ChainType.Main ? NBXplorer.Altcoins.Straks.Networks.Mainnet :
 					chainType == ChainType.Test ? NBXplorer.Altcoins.Straks.Networks.Testnet :
 						chainType == ChainType.Regtest ? NBXplorer.Altcoins.Straks.Networks.Regtest : throw new NotSupportedException(chainType.ToString()),
