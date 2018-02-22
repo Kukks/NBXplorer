@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using NBitcoin.Protocol;
 
 namespace NBXplorer
 {
@@ -36,6 +37,8 @@ namespace NBXplorer
 			get;
 			internal set;
 		}
+
+		public ProtocolVersion? ProtocolVersion { get; set; }
 
 		public override string ToString()
 		{

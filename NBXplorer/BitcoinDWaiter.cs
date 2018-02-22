@@ -360,6 +360,7 @@ namespace NBXplorer
 			{
 				Services = NodeServices.Nothing,
 				IsRelay = true,
+				Version = _Network.ProtocolVersion ?? ProtocolVersion.PROTOCOL_VERSION,
 				TemplateBehaviors =
 				{
 					new AddressManagerBehavior(manager)
@@ -446,7 +447,8 @@ namespace NBXplorer
 			{
 				UserAgent = userAgent,
 				ConnectCancellation = cancellation,
-				IsRelay = false
+				IsRelay = false,
+				Version = _Network.ProtocolVersion?? ProtocolVersion.PROTOCOL_VERSION
 
 			}))
 			{
