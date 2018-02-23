@@ -50,8 +50,7 @@ namespace NBXplorer.Altcoins.Straks
 	    private static object RegisterLazy()
         {
 
-
-            var port = 7575;
+			
             NetworkBuilder builder = new NetworkBuilder();
             _Mainnet = builder.SetConsensus(new Consensus()
             {
@@ -78,7 +77,7 @@ namespace NBXplorer.Altcoins.Straks
 			//.SetBech32(Bech32Type.WITNESS_SCRIPT_ADDRESS, Encoders.Bech32("ltc"))
 
 			.SetMagic(FromByteArray(new byte[] { 0xb0, 0xd5, 0xf0, 0x2c }))
-			.SetPort(port)
+			.SetPort(7575)
             .SetRPCPort(7576)
             .SetName("stak-main")
             .AddAlias("stak-mainnet")
@@ -105,7 +104,6 @@ namespace NBXplorer.Altcoins.Straks
             .BuildAndRegister();
 
             builder = new NetworkBuilder();
-            port = 7575;
             _Testnet = builder.SetConsensus(new Consensus()
             {
                 PowLimit = new Target(new uint256("00000fffff000000000000000000000000000000000000000000000000000000")),
@@ -130,7 +128,7 @@ namespace NBXplorer.Altcoins.Straks
             // .SetBech32(Bech32Type.WITNESS_PUBKEY_ADDRESS, Encoders.Bech32("tltc"))
             // .SetBech32(Bech32Type.WITNESS_SCRIPT_ADDRESS, Encoders.Bech32("tltc"))
 	            .SetMagic(FromByteArray(new byte[] { 0x2a, 0x1e, 0xd5, 0xd1 }))
-			.SetPort(port)
+			.SetPort(7565)
             .SetRPCPort(7576)
             .SetName("stak-test")
             .AddAlias("stak-testnet")
@@ -153,7 +151,6 @@ namespace NBXplorer.Altcoins.Straks
             })).BuildAndRegister();
 
             builder = new NetworkBuilder();
-            port = 19444;
             _Regtest = builder.SetConsensus(new Consensus()
             {
                 PowLimit = new Target(new uint256("00000fffff000000000000000000000000000000000000000000000000000000")),
@@ -177,7 +174,7 @@ namespace NBXplorer.Altcoins.Straks
 			// .SetBech32(Bech32Type.WITNESS_SCRIPT_ADDRESS, Encoders.Bech32("tltc"))
 
 	            .SetMagic(FromByteArray(new byte[] { 0x6e, 0x5c, 0x2c, 0xef }))
-			.SetPort(port)
+			.SetPort(7505)
             .SetRPCPort(19332)
             .SetName("stak-reg")
             .AddAlias("stak-regtest")
