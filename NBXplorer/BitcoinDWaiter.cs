@@ -449,7 +449,6 @@ namespace NBXplorer
 				ConnectCancellation = cancellation,
 				IsRelay = false,
 				Version = _Network.ProtocolVersion?? ProtocolVersion.PROTOCOL_VERSION
-
 			}))
 			{
 				using(var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellation))

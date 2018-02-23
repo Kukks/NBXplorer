@@ -21,7 +21,7 @@ namespace NBXplorer
 					chainType == ChainType.Test ? NBXplorer.Altcoins.Straks.Networks.Testnet :
 						chainType == ChainType.Regtest ? NBXplorer.Altcoins.Straks.Networks.Regtest : throw new NotSupportedException(chainType.ToString()),
 				DefaultSettings = NBXplorerDefaultSettings.GetDefaultSettings(chainType),
-				ProtocolVersion = (ProtocolVersion?)70102
+				ProtocolVersion = (ProtocolVersion?) 70102
 			});
 		}
 
