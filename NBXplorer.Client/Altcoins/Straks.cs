@@ -140,15 +140,8 @@ namespace NBXplorer.Altcoins.Straks
                 new DNSSeedData("st002.radixpi.com", "st002.radixpi.com"),
             })
             .AddSeeds(ToSeed(pnSeed6_test))
-            .SetGenesis(new Block(new BlockHeader()
-            {
-                BlockTime = DateTimeOffset.FromUnixTimeSeconds(1510791350),
-                Nonce = 1093629,
-                Bits = new Target(0x1e0ffff0),
-                Version = 1,
-                HashMerkleRoot = new uint256("15343d9e3cfff44854ec63cc588d5a1ed6ea971085c2be97acb0ea22c0e94fc4")
-
-            })).BuildAndRegister();
+            .SetGenesis(Block.Parse("010000000000000000000000000000000000000000000000000000000000000000000000c44fe9c022eab0ac97bec2851097ead61e5a8d58cc63ec5448f4ff3c9e3d3415b6d80c5af0ff0f1ec3cc17000101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4904ffff001d01044157534a2031362f4e6f762f323031373a20596f7520446f204e6f7420556e6465727374616e6420426974636f696e3a20526561646572732042697465204261636bffffffff0100ca9a3b00000000424104b36e3c4a54589d96c47dbdec6672477b6c4a01434a5f42257976d9053bcf8f809b857900ac246162b60c13ac25351952bea1e128d60a4e110ec9390fd51dfe9500000000"))
+			.BuildAndRegister();
 
             builder = new NetworkBuilder();
             _Regtest = builder.SetConsensus(new Consensus()
@@ -164,6 +157,7 @@ namespace NBXplorer.Altcoins.Straks
                 CoinbaseMaturity = 100,
                 BIP34Hash = new uint256("000002db0642636c786f756062dd7a92f35a2be1665816f8bfa33111ae902b37"),
                 HashGenesisBlock = new uint256("000002db0642636c786f756062dd7a92f35a2be1665816f8bfa33111ae902b37"),
+
             })
             .SetBase58Bytes(Base58Type.PUBKEY_ADDRESS, new byte[] { 122 })
             .SetBase58Bytes(Base58Type.SCRIPT_ADDRESS, new byte[] { 196 })
@@ -180,15 +174,7 @@ namespace NBXplorer.Altcoins.Straks
             .AddAlias("stak-regtest")
             .AddAlias("straks-reg")
             .AddAlias("straks-regtest")
-              .SetGenesis(new Block(new BlockHeader()
-            {
-                BlockTime = DateTimeOffset.FromUnixTimeSeconds(1510272549),
-                Nonce = 1547336,
-                Bits = new Target(0x1e0ffff0),
-                Version = 1,
-                HashMerkleRoot = new uint256("15343d9e3cfff44854ec63cc588d5a1ed6ea971085c2be97acb0ea22c0e94fc4")
-
-            }))
+			.SetGenesis(Block.Parse("010000000000000000000000000000000000000000000000000000000000000000000000c44fe9c022eab0ac97bec2851097ead61e5a8d58cc63ec5448f4ff3c9e3d3415e6d90c5af0ff0f1e927810000101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4904ffff001d01044157534a2031362f4e6f762f323031373a20596f7520446f204e6f7420556e6465727374616e6420426974636f696e3a20526561646572732042697465204261636bffffffff0100ca9a3b00000000424104b36e3c4a54589d96c47dbdec6672477b6c4a01434a5f42257976d9053bcf8f809b857900ac246162b60c13ac25351952bea1e128d60a4e110ec9390fd51dfe9500000000"))
 			.BuildAndRegister();
 
             var home = Environment.GetEnvironmentVariable("HOME");
