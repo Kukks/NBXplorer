@@ -13,31 +13,41 @@ This explorer is not meant to be exposed on internet, but should be used as an i
 * Install [.NET Core 2.0](https://www.microsoft.com/net/core)
 * Bitcoin Core instance synched and running, at least 0.13.1. (0.14.1 if you want the segwit goodness coming)
 
+## API Specification
+
+Read our [API Specification](docs/API.md).
+
 ## How to build and run?
 
 If you are using Bitcoin core default settings:
 
+On Powershell:
 ```
-git clone https://github.com/dgarage/NBXplorer
-cd NBXplorer/NBXplorer
-dotnet build -c Release
+.\build.ps1
 ```
+
+On Linux:
+```
+./build.sh
+```
+
 Then to run:
 
+On Powershell:
 ```
-dotnet run --no-build -c Release
+.\run.ps1 --help
 ```
 
-For help, or passing arguments to the program, pass them after `--`:
+On Linux:
 
 ```
-dotnet run --no-build -c Release -- --help
+./run.sh --help
 ```
 
 Example, if you have ltc node and btc node on regtest (default configuration), and want to connect to them:
 
 ```
-dotnet run --no-build -c Release -- --chains=btc,ltc --network=regtest
+./run.sh --chains=btc,ltc --network=regtest
 ```
 
 ## With Docker

@@ -64,9 +64,9 @@ namespace NBXplorer
 
 		private static string ToWebsocketUri(string uri)
 		{
-			if(uri.StartsWith("https://"))
+			if(uri.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
 				uri = uri.Replace("https://", "wss://");
-			if(uri.StartsWith("http://"))
+			if(uri.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
 				uri = uri.Replace("http://", "ws://");
 			return uri;
 		}
@@ -81,6 +81,26 @@ namespace NBXplorer
 		public Task ListenNewBlockAsync(CancellationToken cancellation = default(CancellationToken))
 		{
 			return _MessageListener.Send(new Models.NewBlockEventRequest() { CryptoCode = _Client.CryptoCode }, cancellation);
+		}
+
+		/// <summary>
+		/// Listen all derivation schemes
+		/// </summary>
+		/// <param name="allCryptoCodes">If true, all derivation schemes of all crypto code will get a notification (default: false)</param>
+		/// <param name="cancellation">Cancellation token</param>
+		public void ListenAllDerivationSchemes(bool allCryptoCodes = false, CancellationToken cancellation = default(CancellationToken))
+		{
+			ListenAllDerivationSchemesAsync(allCryptoCodes, cancellation).GetAwaiter().GetResult();
+		}
+
+		/// <summary>
+		/// Listen all derivation schemes
+		/// </summary>
+		/// <param name="allCryptoCodes">If true, all derivation schemes of all crypto code will get a notification (default: false)</param>
+		/// <param name="cancellation">Cancellation token</param>
+		public Task ListenAllDerivationSchemesAsync(bool allCryptoCodes = false, CancellationToken cancellation = default(CancellationToken))
+		{
+			return _MessageListener.Send(new Models.NewTransactionEventRequest() { CryptoCode = allCryptoCodes ? "*" : _Client.CryptoCode }, cancellation);
 		}
 
 		public void ListenDerivationSchemes(DerivationStrategyBase[] derivationSchemes, CancellationToken cancellation = default(CancellationToken))

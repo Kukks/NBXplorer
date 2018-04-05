@@ -143,10 +143,12 @@ namespace NBXplorer.Controllers
 			var location = waiter.GetLocation();
 
 			var blockchainInfoAsync = waiter.RPCAvailable ? waiter.RPC.GetBlockchainInfoAsync() : null;
+			var networkInfoAsync = waiter.RPCAvailable ? waiter.RPC.GetNetworkInfoAsync() : null;
 			repo.Ping();
 			var pingAfter = DateTimeOffset.UtcNow;
 
 			GetBlockchainInfoResponse blockchainInfo = blockchainInfoAsync == null ? null : await blockchainInfoAsync;
+			GetNetworkInfoResponse networkInfo = networkInfoAsync == null ? null : await networkInfoAsync;
 			var status = new StatusResult()
 			{
 				ChainType = network.DefaultSettings.ChainType,
@@ -169,7 +171,9 @@ namespace NBXplorer.Controllers
 					IsSynched = !waiter.IsSynchingCore(blockchainInfo),
 					Blocks = blockchainInfo.Blocks,
 					Headers = blockchainInfo.Headers,
-					VerificationProgress = blockchainInfo.VerificationProgress
+					VerificationProgress = blockchainInfo.VerificationProgress,
+					MinRelayTxFee = new FeeRate(Money.Coins((decimal)networkInfo.relayfee), 1000),
+					IncrementalRelayFee = new FeeRate(Money.Coins((decimal)networkInfo.incrementalfee), 1000)
 				};
 				status.IsFullySynched &= status.BitcoinStatus.IsSynched;
 			}
@@ -204,6 +208,8 @@ namespace NBXplorer.Controllers
 				return NotFound();
 
 			GetNetwork(cryptoCode); // Internally check if cryptoCode is correct
+
+			string listenAllDerivationSchemes = null;
 			var listenedBlocks = new ConcurrentDictionary<string, string>();
 			var listenedDerivations = new ConcurrentDictionary<(Network, DerivationStrategyBase), DerivationStrategyBase>();
 
@@ -234,7 +240,10 @@ namespace NBXplorer.Controllers
 				var network = Waiters.GetWaiter(o.CryptoCode);
 				if(network == null)
 					return;
-				if(listenedDerivations.ContainsKey((network.Network.NBitcoinNetwork, o.Match.DerivationStrategy)))
+				if(
+				listenAllDerivationSchemes == "*" ||
+				listenAllDerivationSchemes == o.CryptoCode ||
+				listenedDerivations.ContainsKey((network.Network.NBitcoinNetwork, o.Match.DerivationStrategy)))
 				{
 					var chain = ChainProvider.GetChain(o.CryptoCode);
 					if(chain == null)
@@ -263,14 +272,21 @@ namespace NBXplorer.Controllers
 							listenedBlocks.TryAdd(r.CryptoCode, r.CryptoCode);
 							break;
 						case Models.NewTransactionEventRequest r:
-							r.CryptoCode = r.CryptoCode ?? cryptoCode;
-							var network = Waiters.GetWaiter(r.CryptoCode)?.Network;
-							if(network == null)
-								break;
-							foreach(var derivation in r.DerivationSchemes)
+							if(r.DerivationSchemes != null)
 							{
-								var parsed = new DerivationStrategyFactory(network.NBitcoinNetwork).Parse(derivation);
-								listenedDerivations.TryAdd((network.NBitcoinNetwork, parsed), parsed);
+								r.CryptoCode = r.CryptoCode ?? cryptoCode;
+								var network = Waiters.GetWaiter(r.CryptoCode)?.Network;
+								if(network == null)
+									break;
+								foreach(var derivation in r.DerivationSchemes)
+								{
+									var parsed = new DerivationStrategyFactory(network.NBitcoinNetwork).Parse(derivation);
+									listenedDerivations.TryAdd((network.NBitcoinNetwork, parsed), parsed);
+								}
+							}
+							else
+							{
+								listenAllDerivationSchemes = r.CryptoCode;
 							}
 							break;
 						default:
@@ -359,6 +375,7 @@ namespace NBXplorer.Controllers
 			{
 				response = new GetTransactionsResponse();
 				int currentHeight = chain.Height;
+				response.Height = currentHeight;
 				var txs = GetAnnotatedTransactions(repo, chain, extPubKey);
 				foreach(var item in new[]
 				{
@@ -385,22 +402,29 @@ namespace NBXplorer.Controllers
 					item.TxSet.Bookmark = Bookmark.Start;
 					item.TxSet.KnownBookmark = item.KnownBookmarks.Contains(Bookmark.Start) ? Bookmark.Start : null;
 
+					BookmarkProcessor processor = new BookmarkProcessor(32 + 32 + 25);
 					foreach(var tx in item.AnnotatedTx.Values)
 					{
-						BookmarkProcessor processor = new BookmarkProcessor(32 + 32 + 25);
+						processor.PushNew();
 						processor.AddData(tx.Record.Transaction.GetHash());
 						processor.AddData(tx.Record.BlockHash ?? uint256.Zero);
 						processor.UpdateBookmark();
 
-						item.TxSet.Transactions.Add(new TransactionInformation()
+						var txInfo = new TransactionInformation()
 						{
 							BlockHash = tx.Record.BlockHash,
 							Height = tx.Record.BlockHash == null ? null : tx.Height,
 							TransactionId = tx.Record.Transaction.GetHash(),
 							Transaction = includeTransaction ? tx.Record.Transaction : null,
 							Confirmations = tx.Record.BlockHash == null ? 0 : currentHeight - tx.Height.Value + 1,
-							Timestamp = txs.GetByTxId(tx.Record.Transaction.GetHash()).Select(t => t.Record.FirstSeen).First()
-						});
+							Timestamp = txs.GetByTxId(tx.Record.Transaction.GetHash()).Select(t => t.Record.FirstSeen).First(),
+							Inputs = ToMatch(txs, tx.Record.Transaction.Inputs.Select(o => txs.GetUTXO(o.PrevOut)).ToList(), extPubKey, tx.Record.TransactionMatch.Inputs),
+							Outputs = ToMatch(txs, tx.Record.Transaction.Outputs, extPubKey, tx.Record.TransactionMatch.Outputs)
+						};
+
+						item.TxSet.Transactions.Add(txInfo);
+
+						txInfo.BalanceChange = txInfo.Outputs.Select(o => o.Value).Sum() - txInfo.Inputs.Select(o => o.Value).Sum();
 
 						item.TxSet.Bookmark = processor.CurrentBookmark;
 						if(item.KnownBookmarks.Contains(processor.CurrentBookmark))
@@ -417,6 +441,25 @@ namespace NBXplorer.Controllers
 			}
 
 			return response;
+		}
+
+		List<TransactionInformationMatch> ToMatch(AnnotatedTransactionCollection txs,
+												 List<TxOut> outputs,
+												 DerivationStrategyBase derivation,
+												 Repository.TransactionMiniKeyInformation[] keyInformations)
+		{
+			var result = new List<TransactionInformationMatch>();
+			for(int i = 0; i < outputs.Count; i++)
+			{
+				if(outputs[i] == null)
+					continue;
+				var keyPath = txs.GetKeyPath(outputs[i].ScriptPubKey);
+				if(keyPath == null)
+					continue;
+
+				result.Add(new TransactionInformationMatch() { Index = i, KeyPath = keyPath, Value = outputs[i].Value });
+			}
+			return result;
 		}
 
 		[HttpGet]

@@ -66,17 +66,17 @@ namespace NBXplorer.Models
 			}
 		}
 
-		public Coin[] GetUnspentCoins()
+		public Coin[] GetUnspentCoins(bool excludeUnconfirmedUTXOs = false)
 		{
 			if(Confirmed.KnownBookmark != null || Unconfirmed.KnownBookmark != null)
 				throw new InvalidOperationException("This UTXOChanges is partial, it is calculate the unspent coins");
-			return GetUnspentUTXOs().Select(c => c.AsCoin(DerivationStrategy)).ToArray();
+			return GetUnspentUTXOs(excludeUnconfirmedUTXOs).Select(c => c.AsCoin(DerivationStrategy)).ToArray();
 		}
 
-		public UTXO[] GetUnspentUTXOs()
+		public UTXO[] GetUnspentUTXOs(bool excludeUnconfirmedUTXOs = false)
 		{
 			Dictionary<OutPoint, UTXO> received = new Dictionary<OutPoint, UTXO>();
-			foreach(var utxo in Confirmed.UTXOs.Concat(Unconfirmed.UTXOs))
+			foreach(var utxo in Confirmed.UTXOs.Concat(excludeUnconfirmedUTXOs ? (IEnumerable<UTXO>)Array.Empty<UTXO>() : Unconfirmed.UTXOs))
 			{
 				received.TryAdd(utxo.Outpoint, utxo);
 			}
@@ -87,9 +87,9 @@ namespace NBXplorer.Models
 			return received.Values.ToArray();
 		}
 
-		public Key[] GetKeys(ExtKey extKey)
+		public Key[] GetKeys(ExtKey extKey, bool excludeUnconfirmedUTXOs = false)
 		{
-			return GetUnspentUTXOs().Select(u => extKey.Derive(u.KeyPath).PrivateKey).ToArray();
+			return GetUnspentUTXOs(excludeUnconfirmedUTXOs).Select(u => extKey.Derive(u.KeyPath).PrivateKey).ToArray();
 		}
 	}
 	public class UTXOChange
@@ -237,7 +237,7 @@ namespace NBXplorer.Models
 			}
 		}
 
-		KeyPath _KeyPath;		
+		KeyPath _KeyPath;
 
 		public KeyPath KeyPath
 		{
