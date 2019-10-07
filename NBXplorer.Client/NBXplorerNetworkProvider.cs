@@ -26,10 +26,13 @@ namespace NBXplorer
 			InitGobyte(networkType);
 			InitColossus(networkType);
 			InitChaincoin(networkType);
+			InitLiquid(networkType);
 			NetworkType = networkType;
-			foreach(var chain in _Networks.Values)
+			foreach (var chain in _Networks.Values)
 			{
-				chain.DerivationStrategyFactory = new DerivationStrategy.DerivationStrategyFactory(chain.NBitcoinNetwork);
+				chain.DerivationStrategyFactory = chain.DerivationStrategyFactory ??
+				                                  new DerivationStrategy.DerivationStrategyFactory(
+					                                  chain.NBitcoinNetwork);
 			}
 		}
 

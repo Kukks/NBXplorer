@@ -5,16 +5,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using NBXplorer.DerivationStrategy;
 
 namespace NBXplorer
 {
 	public class NBXplorerNetwork
 	{
-		public NBXplorerNetwork(INetworkSet networkSet, NBitcoin.NetworkType networkType)
+		public NBXplorerNetwork(INetworkSet networkSet, NBitcoin.NetworkType networkType, DerivationStrategyFactory derivationStrategyFactory = null)
 		{
 			NBitcoinNetwork = networkSet.GetNetwork(networkType);
 			CryptoCode = networkSet.CryptoCode;
 			DefaultSettings = NBXplorerDefaultSettings.GetDefaultSettings(networkType);
+			DerivationStrategyFactory = derivationStrategyFactory;
 		}
 		public Network NBitcoinNetwork
 		{
