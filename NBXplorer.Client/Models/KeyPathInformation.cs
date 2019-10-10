@@ -13,16 +13,7 @@ namespace NBXplorer.Models
 		{
 
 		}
-		public KeyPathInformation(KeyPathTemplates keyPathTemplates, KeyPath keyPath, DerivationStrategyBase derivationStrategy)
-		{
-			var derivation = derivationStrategy.GetDerivation(keyPath);
-			ScriptPubKey = derivation.ScriptPubKey;
-			Redeem = derivation.Redeem;
-			TrackedSource = new DerivationSchemeTrackedSource(derivationStrategy);
-			DerivationStrategy = derivationStrategy;
-			Feature = keyPathTemplates.GetDerivationFeature(keyPath);
-			KeyPath = keyPath;
-		}
+		
 		public TrackedSource TrackedSource { get; set; }
 		[JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
 		public DerivationFeature Feature
