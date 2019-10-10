@@ -22,10 +22,8 @@ namespace NBXplorer.Models
 			DerivationStrategy = derivationStrategy;
 			Feature = keyPathTemplates.GetDerivationFeature(keyPath);
 			KeyPath = keyPath;
-			BlindingKey = derivation.BlindingKey;
 		}
 		public TrackedSource TrackedSource { get; set; }
-		public PubKey BlindingKey { get; set; }
 		[JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
 		public DerivationFeature Feature
 		{
@@ -55,6 +53,15 @@ namespace NBXplorer.Models
 		public int GetIndex()
 		{
 			return (int)KeyPath.Indexes[KeyPath.Indexes.Length - 1];
+		}
+		
+		public virtual KeyPathInformation AddAddress(Network network)
+		{
+			if(Address == null)
+			{
+				Address = ScriptPubKey.GetDestinationAddress(network).ToString();
+			}
+			return this;
 		}
 	}
 }
