@@ -5,7 +5,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using NBitcoin.Altcoins.Elements;
+using NBitcoin.RPC;
 using NBXplorer.DerivationStrategy;
+using NBXplorer.Models;
 
 namespace NBXplorer
 {
@@ -96,6 +99,13 @@ namespace NBXplorer
 		public override string ToString()
 		{
 			return CryptoCode.ToString();
+		}
+		
+		
+
+		public virtual Task<Transaction> GetTransaction(RPCClient rpcClient,Transaction tx, KeyPathInformation keyInfo)
+		{
+			return Task.FromResult(tx);
 		}
 	}
 }
