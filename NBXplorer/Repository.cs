@@ -333,7 +333,7 @@ namespace NBXplorer
 			_Network = network;
 			this.keyPathTemplates = keyPathTemplates;
 			_rpcClient = rpcClient;
-			Serializer = new Serializer(_Network.NBitcoinNetwork);
+			Serializer = new Serializer(_Network);
 			_Network = network;
 			_TxContext = new DBriizeTransactionContext(engine);
 			_TxContext.UnhandledException += (s, ex) =>

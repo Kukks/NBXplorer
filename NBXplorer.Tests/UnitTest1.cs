@@ -28,6 +28,11 @@ namespace NBXplorer.Tests
 			Logs.LogProvider = new XUnitLogProvider(helper);
 		}
 
+		private NBXplorerNetwork GetNetwork(Network network)
+		{
+			return new NBXplorerNetwork(network.NetworkSet, network.NetworkType, new DerivationStrategyFactory(network));
+		}
+
 		[Fact]
 		public void CanFixedSizeCache()
 		{
@@ -130,7 +135,7 @@ namespace NBXplorer.Tests
 			using (var tester = RepositoryTester.Create(true))
 			{
 				var dummy = new DirectDerivationStrategy(new ExtKey().Neuter().GetWif(Network.RegTest)) { Segwit = false };
-				var seria = new Serializer(Network.RegTest);
+				var seria = new Serializer(GetNetwork(Network.RegTest));
 				var keyInfo = new KeyPathInformation()
 				{
 					TrackedSource = new DerivationSchemeTrackedSource(dummy),
@@ -960,7 +965,8 @@ namespace NBXplorer.Tests
 				msg = await messageReceiver.ReceiveAsync();
 
 				JsonSerializerSettings settings = new JsonSerializerSettings();
-				new Serializer(Network.RegTest).ConfigureSerializer(settings);
+				
+				new Serializer(GetNetwork(Network.RegTest)).ConfigureSerializer(settings);
 
 				Assert.True(msg != null, $"No message received on Azure Service Bus Block Queue : {AzureServiceBusTestConfig.NewBlockQueue} after 10 read attempts.");
 
@@ -1032,7 +1038,7 @@ namespace NBXplorer.Tests
 
 				//Configure JSON custom serialization
 				JsonSerializerSettings settings = new JsonSerializerSettings();
-				new Serializer(Network.RegTest).ConfigureSerializer(settings);
+				new Serializer(GetNetwork(Network.RegTest)).ConfigureSerializer(settings);
 
 				//Test Service Bus Queue
 				//Retry 10 times 

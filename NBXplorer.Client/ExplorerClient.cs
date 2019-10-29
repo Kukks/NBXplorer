@@ -82,7 +82,7 @@ namespace NBXplorer
 				throw new ArgumentNullException(nameof(network));
 			_Address = serverAddress;
 			_Network = network;
-			Serializer = new Serializer(network.NBitcoinNetwork);
+			Serializer = new Serializer(network);
 			_CryptoCode = _Network.CryptoCode;
 			_Factory = Network.DerivationStrategyFactory;
 			SetCookieAuth(network.DefaultSettings.DefaultCookieFile);

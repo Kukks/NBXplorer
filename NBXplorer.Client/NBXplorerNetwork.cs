@@ -39,7 +39,7 @@ namespace NBXplorer
 		{
 			get
 			{
-				_Serializer = _Serializer ?? new Serializer(NBitcoinNetwork);
+				_Serializer = _Serializer ?? new Serializer(this);
 				return _Serializer;
 			}
 		}
