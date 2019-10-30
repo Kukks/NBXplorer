@@ -341,7 +341,7 @@ namespace NBXplorer.Controllers
 								{
 									foreach (var derivation in r.DerivationSchemes)
 									{
-										var parsed = new DerivationStrategyFactory(network.NBitcoinNetwork).Parse(derivation);
+										var parsed = network.DerivationStrategyFactory.Parse(derivation);
 										listenedDerivations.TryAdd((network.NBitcoinNetwork, parsed), parsed);
 									}
 								}
@@ -365,7 +365,7 @@ namespace NBXplorer.Controllers
 								{
 									foreach (var trackedSource in r.TrackedSources)
 									{
-										if (TrackedSource.TryParse(trackedSource, out var parsed, network.NBitcoinNetwork))
+										if (TrackedSource.TryParse(trackedSource, out var parsed, network))
 											listenedTrackedSource.TryAdd((network.NBitcoinNetwork, parsed), parsed);
 									}
 								}
