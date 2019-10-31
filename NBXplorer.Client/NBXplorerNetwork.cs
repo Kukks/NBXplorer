@@ -65,6 +65,10 @@ namespace NBXplorer
 		{
 			return CryptoCode.ToString();
 		}
-		
+
+		public virtual ExplorerClient CreateExplorerClient(Uri uri)
+		{
+			return new ExplorerClient(this, uri);
+		}
 	}
 }
