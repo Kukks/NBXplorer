@@ -64,7 +64,7 @@ namespace NBXplorer.DerivationStrategy
 			return strategy;
 		}
 
-		protected DerivationStrategyBase ParseCore(string str, Dictionary<string, object> additionalOptions)
+		protected DerivationStrategyBase ParseCore(string str, Dictionary<string, object> additionalOptions = null)
 		{
 			bool legacy = false;
 			ReadBool(ref str, "legacy", ref legacy);
@@ -83,7 +83,7 @@ namespace NBXplorer.DerivationStrategy
 				KeepOrder = keepOrder,
 				Legacy = legacy,
 				P2SH = p2sh,
-				AdditionalOptions = additionalOptions
+				AdditionalOptions = additionalOptions ??  new Dictionary<string, object>()
 			};
 			var match = MultiSigRegex.Match(str);
 			if(match.Success)
