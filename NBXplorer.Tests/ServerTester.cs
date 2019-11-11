@@ -142,7 +142,7 @@ namespace NBXplorer.Tests
 			var conf = (ExplorerConfiguration)Host.Services.GetService(typeof(ExplorerConfiguration));
 			Host.Start();
 			Configuration = conf;
-			_Client = new ExplorerClient(nbxnetwork, Address);
+			_Client = nbxnetwork.CreateExplorerClient(Address);
 			_Client.SetCookieAuth(Path.Combine(conf.DataDir, ".cookie"));
 			Notifications = _Client.CreateLongPollingNotificationSession();
 		}
