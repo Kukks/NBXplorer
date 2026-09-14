@@ -1318,12 +1318,29 @@ namespace NBXplorer.Backend
 			var walletKey = GetWalletKey(trackedSource);
 			await using var connection = await ConnectionFactory.CreateConnection();
 			var command = new CommandDefinition("""
-				SELECT s.addr AS address, ws.script
-				FROM wallets_scripts ws
-				JOIN scripts s USING (code, script)
-				WHERE ws.code=@code AND ws.wallet_id=@wid AND (@continuation IS NULL OR ws.script > @continuation) AND s.addr IS NOT NULL
-				ORDER BY ws.script
-				LIMIT @limit
+				WITH RECURSIVE wallet_tree(wallet_id) AS (
+					SELECT CAST(@wid AS text)
+					UNION
+					SELECT ww.wallet_id
+					FROM wallets_wallets ww
+					JOIN wallet_tree parent ON parent.wallet_id=ww.parent_id
+				), page AS (
+					SELECT ws.code, ws.script, s.addr
+					FROM wallets_scripts ws
+					JOIN scripts s USING (code, script)
+					WHERE ws.code=@code AND ws.wallet_id=@wid AND (@continuation IS NULL OR ws.script > @continuation) AND s.addr IS NOT NULL
+					ORDER BY ws.script
+					LIMIT @limit
+				)
+				SELECT COALESCE((
+					SELECT MIN(ds.metadata->>'blindedAddress')
+					FROM wallet_tree child
+					JOIN wallets_descriptors wd ON wd.wallet_id=child.wallet_id AND wd.code=page.code
+					JOIN descriptors_scripts ds ON ds.code=wd.code AND ds.descriptor=wd.descriptor AND ds.script=page.script
+					WHERE ds.metadata->>'blindedAddress' IS NOT NULL
+				), page.addr) AS address, page.script
+				FROM page
+				ORDER BY page.script
 				""", new { code = Network.CryptoCode, walletKey.wid, continuation, limit }, cancellationToken: cancellation);
 			return (await connection.QueryAsync<WalletAddress>(command)).ToArray();
 		}
