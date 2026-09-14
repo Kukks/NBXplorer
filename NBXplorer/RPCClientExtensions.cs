@@ -97,7 +97,7 @@ namespace NBXplorer
 			catch (RPCException ex) when (!cancellationToken.IsCancellationRequested && ex.Message.StartsWith("Scan already in progress", StringComparison.OrdinalIgnoreCase))
 			{
 				await Task.Delay(delay, cancellationToken);
-				delay = Math.Max(delay * 2, 10_000);
+				delay = Math.Min(delay * 2, 10_000);
 				goto retry;
 			}
 		}
