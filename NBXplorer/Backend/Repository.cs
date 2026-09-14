@@ -1311,6 +1311,23 @@ namespace NBXplorer.Backend
 			return await connection.ExecuteScalarAsync<int>(WalletCheckQuery, new { walletKey.wid }) != 0;
 		}
 
+		public record WalletAddress(string Address, string Script);
+
+		public async Task<WalletAddress[]> GetAddressesPage(TrackedSource trackedSource, int limit, string continuation, CancellationToken cancellation = default)
+		{
+			var walletKey = GetWalletKey(trackedSource);
+			await using var connection = await ConnectionFactory.CreateConnection();
+			var command = new CommandDefinition("""
+				SELECT s.addr AS address, ws.script
+				FROM wallets_scripts ws
+				JOIN scripts s USING (code, script)
+				WHERE ws.code=@code AND ws.wallet_id=@wid AND (@continuation IS NULL OR ws.script > @continuation) AND s.addr IS NOT NULL
+				ORDER BY ws.script
+				LIMIT @limit
+				""", new { code = Network.CryptoCode, walletKey.wid, continuation, limit }, cancellationToken: cancellation);
+			return (await connection.QueryAsync<WalletAddress>(command)).ToArray();
+		}
+
 		public void RemoveFromCache(IEnumerable<uint256> txIds)
 		{
 			foreach (var id in txIds)

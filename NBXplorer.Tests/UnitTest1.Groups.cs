@@ -3,6 +3,7 @@ using NBitcoin;
 using NBXplorer.Backend;
 using NBXplorer.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -119,6 +120,36 @@ namespace NBXplorer.Tests
 
 			balance = await tester.Client.GetBalanceAsync(gts);
 			Assert.Equal(Money.Coins(1.0m + 1.2m), balance.Unconfirmed);
+		}
+
+		[Fact]
+		public async Task CanPageAndStreamGroupAddresses()
+		{
+			using var tester = CreateTester();
+			var group = await tester.Client.CreateGroupAsync(Cancel);
+			var addresses = Enumerable.Range(0, 5)
+				.Select(_ => new Key().GetAddress(ScriptPubKeyType.TaprootBIP86, tester.Network))
+				.ToArray();
+			await tester.Client.AddGroupAddressAsync("BTC", group.GroupId, addresses.Select(a => a.ToString()).ToArray(), Cancel);
+			var trackedSource = new GroupTrackedSource(group.GroupId);
+
+			var firstPage = await tester.Client.GetAddressPageAsync(trackedSource, 2, cancellation: Cancel);
+			var secondPage = await tester.Client.GetAddressPageAsync(trackedSource, 2, firstPage.Continuation, Cancel);
+			var thirdPage = await tester.Client.GetAddressPageAsync(trackedSource, 2, secondPage.Continuation, Cancel);
+
+			Assert.Equal(2, firstPage.Addresses.Length);
+			Assert.Equal(2, secondPage.Addresses.Length);
+			Assert.Single(thirdPage.Addresses);
+			Assert.NotNull(firstPage.Continuation);
+			Assert.NotNull(secondPage.Continuation);
+			Assert.Null(thirdPage.Continuation);
+			Assert.Equal(addresses.OrderBy(a => a.ToString()),
+				firstPage.Addresses.Concat(secondPage.Addresses).Concat(thirdPage.Addresses).OrderBy(a => a.ToString()));
+
+			var streamed = new List<BitcoinAddress>();
+			await foreach (var address in tester.Client.GetAddressesAsync(trackedSource, 2, Cancel))
+				streamed.Add(address);
+			Assert.Equal(addresses.OrderBy(a => a.ToString()), streamed.OrderBy(a => a.ToString()));
 		}
 
 		private async Task<NBXplorerException> AssertNBXplorerException(int httpCode, Task<GroupInformation> task)
