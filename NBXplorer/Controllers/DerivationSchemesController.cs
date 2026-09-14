@@ -17,6 +17,7 @@ using NBitcoin.WalletPolicies;
 namespace NBXplorer.Controllers
 {
 	[Route($"v1/{CommonRoutes.BaseDerivationEndpoint}")]
+	[Authorize]
 	public class DerivationSchemesController : Controller
 	{
 		public ScanUTXOSetService ScanUTXOSetService { get; }
