@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NBitcoin;
+using Microsoft.AspNetCore.Authorization;
 using NBXplorer.Backend;
 using NBXplorer.DerivationStrategy;
 using NBXplorer.Models;
